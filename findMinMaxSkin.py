@@ -38,17 +38,41 @@ def findMinMaxSkin(inImage):
 	idx   = (maskIm != 0)
 	
 	maskY[idx] = imageY[idx]
-	minSkin[0][0] = np.min(maskY[np.nonzero(maskY)])
-	maxSkin[0][0] = np.max(maskY[np.nonzero(maskY)])
+	testMinY = np.min(maskY[np.nonzero(maskY)])
+	if testMinY > 80:
+		minSkin[0][0] = testMinY
+	else:
+		minSkin[0][0] = 80
+	testMaxY = np.max(maskY[np.nonzero(maskY)])
+	if testMaxY < 255:
+		maxSkin[0][0] = testMaxY
+	else:
+		maxSkin[0][0] = 255
 	
 	maskCr[idx] = imageCr[idx]
-	minSkin[0][1]  = np.nanmin(maskCr[np.nonzero(maskCr)])
-	maxSkin[0][1]  = np.nanmax(maskCr[np.nonzero(maskCr)])
+	testMinCr = np.nanmin(maskCr[np.nonzero(maskCr)])
+	if testMinCr > 135:
+		minSkin[0][1]  = testMinCr
+	else:
+		minSkin[0][1] = 135
+	testMaxCr = np.nanmax(maskCr[np.nonzero(maskCr)])
+	if testMaxCr < 180:
+		maxSkin[0][1]  = testMaxCr
+	else:
+		maxSkin[0][1] = 180
 	
 	maskCb[idx] = imageCb[idx]
-	minSkin[0][2]  = np.nanmin(maskCb[np.nonzero(maskCb)])
-	maxSkin[0][2]  = np.nanmax(maskCb[np.nonzero(maskCb)])
-	
+	testMinCb = np.nanmin(maskCb[np.nonzero(maskCb)])
+	if testMinCb > 85:
+		minSkin[0][2]  = testMinCb
+	else:
+		minSkin[0][2] = 85
+	testMaxCb = np.nanmax(maskCb[np.nonzero(maskCb)])
+	if testMaxCb < 135:
+		maxSkin[0][2]  = testMaxCb
+	else:
+		maxSkin[0][2] = 135
+		
 	#Output Structure:
 	#minSkin = [minY minCr minCb]
 	#maxSkin = [maxY maxCr maxCb]

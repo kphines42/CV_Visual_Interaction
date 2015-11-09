@@ -40,6 +40,10 @@ def skin2BW(frame):
 	imageBW = imageBWTemp & imageCb_S
 	imageBW = mh.morph.close(imageBW)
 	
+	#Convert imageBW to uint8
+	imageBW = imageBW.astype(int)*255
+	imageBW = imageBW.astype(np.uint8)
+	
 	#Return BW image
 	return imageBW
 	
@@ -75,6 +79,10 @@ def personalSkin2BW(frame,minSkin,maxSkin):
 	imageBWTemp = imageY_S & imageCr_S
 	imageBW = imageBWTemp & imageCb_S
 	imageBW = mh.morph.close(imageBW)
+	
+	#Convert imageBW to uint8
+	imageBW = imageBW.astype(int)*255
+	imageBW = imageBW.astype(np.uint8)
 	
 	#Return BW image
 	return imageBW
