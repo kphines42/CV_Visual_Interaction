@@ -38,11 +38,26 @@ def skin2BW(frame):
 	#Boolean matrix of the skin possibilities
 	imageBWTemp = imageY_S & imageCr_S
 	imageBW = imageBWTemp & imageCb_S
+	
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+
 	imageBW = mh.morph.close(imageBW)
 	
 	#Convert imageBW to uint8
 	imageBW = imageBW.astype(int)*255
 	imageBW = imageBW.astype(np.uint8)
+	
+	
 	
 	#Return BW image
 	return imageBW
@@ -78,7 +93,22 @@ def personalSkin2BW(frame,minSkin,maxSkin):
 	#Boolean matrix of the skin possibilities
 	imageBWTemp = imageY_S & imageCr_S
 	imageBW = imageBWTemp & imageCb_S
+	
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+	imageBW = mh.morph.erode(imageBW)
+
 	imageBW = mh.morph.close(imageBW)
+	
+	
 	
 	#Convert imageBW to uint8
 	imageBW = imageBW.astype(int)*255
