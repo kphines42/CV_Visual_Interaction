@@ -5,22 +5,8 @@ import os
 import mahotas as mh
 from skin2BW import skin2BW, personalSkin2BW
 from findMinMaxSkin import findMinMaxSkin
-#from init_func import rmBG, rmFace
+from blob import blob
 
-def blob(binary_frame,frame):
-
-	_, contours, _ = cv2.findContours(binary_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	#contours, _ = cv2.findContours(binary_frame, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-	
-	for i, c in enumerate(contours):
-		area = cv2.contourArea(c)
-		if area > 1000:
-			cv2.drawContours(frame, contours, i, (255, 0, 0), 3)
-
-	return frame, contours
-
-	
-	
 def main():
 	
 
@@ -53,16 +39,15 @@ def main():
 	#print maxSkin
 	
 	while(cap.isOpened()):
-
-		#ret, frame = cap.read()
 		
 		fgmask = fgbg.apply(frame)
 		masked_frame = cv2.bitwise_and(frame,frame,mask = fgmask)
 		binary_frame = personalSkin2BW(masked_frame,minSkin,maxSkin)#skin2BW(frame)
-		
-		
-		frame, contours = blob(binary_frame,frame)
 
+		frame, contours = blob(binary_frame,frame)
+		cv2.imshow('frame',binary_frame)
+		
+		
 		if not ret == False:
 		
 			objectx = []
@@ -81,8 +66,6 @@ def main():
 						#cv2.circle(frame,(cx,cy),5,(0,0,255),-2)
 						objectx.append(cx)
 						objecty.append(cy)
-						#print objectx, objecty
-			#os.system("pause")
 			
 			objectloc = []
 			objectval = []
@@ -90,7 +73,6 @@ def main():
 			y = []
 			
 			if not objectx_old == []:
-				#print objectx, objecty, objectx_old, objecty_old
 				
 				for i, j in zip(objectx, objecty):
 	
@@ -109,10 +91,11 @@ def main():
 					objectval.append(minval)
 					x.append(i)
 					y.append(j)
+					
 			if not objectloc == []:
 				co = len(objectloc)
 				for i in range(0, co-1):
-					if objectval[i] > 2:
+					if objectval[i] > 10:
 						cv2.circle(frame,(x[i],y[i]),5,(0,0,255),-2)
 			objectx_old = objectx
 			objecty_old = objecty
@@ -120,13 +103,11 @@ def main():
 		else:
 			break
 		
-		cv2.imshow('frame',frame)
+		cv2.imshow('frame',frame)#frame)
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
 		
 		ret, frame = cap.read()
-		
-	#print "Out of the while loop"
 		
 	cap.release()
 	cv2.destroyAllWindows()
