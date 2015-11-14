@@ -23,7 +23,7 @@ def main():
 	args = vars(ap.parse_args())
 
 	#About a 10 second delay with a threshold of 50 (intensity)
-	fgbg = cv2.createBackgroundSubtractorMOG2(5000,50)
+	fgbg = cv2.createBackgroundSubtractorMOG2(50000,50)
 	
 	# if no video, use webcam
 	if not args.get("video", False):
@@ -37,30 +37,12 @@ def main():
 
 	objectx_old = []
 	objecty_old = []
-	
-	#Unsuccessful attempt at interaction...
-	#if nome is 0:
-	#	ret, frame = cap.read()
-	#	cv2.imshow("First Frame",frame)
-	#	print "First frame to be sent to findMinMaxSkin()\n"
-	#	print "Press any key to continue... \n"
-	#	cv2.waitKey(0)
-	#	
-	#	retryInitial = raw_input("Would you like a new initial frame? Y/N \n")
-	#	if retryInitial is "Y":
-	#		print "Please adjust appropriately"
-	#		ret,frame = cap.read()
-	#		cv2.imshow("New initial frame", frame)
-
-		#binary_frame = skin2BW(frame)
-	#	minSkin,maxSkin = findMinMaxSkin(frame)
-	#else:
 	ret, frame = cap.read()
-		#binary_frame = skin2BW(frame)
+	#binary_frame = skin2BW(frame)
 	minSkin,maxSkin = findMinMaxHand(frame)#findMinMaxSkin(frame)
 	
-	print minSkin
-	print maxSkin
+	#print minSkin
+	#print maxSkin
 	
 	# Create some random colors
 	color = np.random.randint(0,255,(100,3))
@@ -75,8 +57,8 @@ def main():
 		
 		fgmask = fgbg.apply(frame)
 		masked_frame = cv2.bitwise_and(frame,frame,mask = fgmask)
-		#binary_frame = skin2BW(masked_frame)#personalSkin2BW(frame,minSkin,maxSkin)#skin2BW(frame)
-		binary_frame = skin2BW(frame)
+		binary_frame = personalSkin2BW(masked_frame,minSkin,maxSkin)#skin2BW(frame)
+		#binary_frame = skin2BW(frame)
 		
 		
 		frame, contours = blob(binary_frame,frame)

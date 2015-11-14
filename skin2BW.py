@@ -100,13 +100,13 @@ def personalSkin2BW(frame,minSkin,maxSkin):
 	imageBW = mh.morph.dilate(imageBW)
 	imageBW = mh.morph.dilate(imageBW)
 
-	imageBW = mh.morph.erode(imageBW)
-	imageBW = mh.morph.erode(imageBW)
-	imageBW = mh.morph.erode(imageBW)
-	imageBW = mh.morph.erode(imageBW)
-	imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
 
-	imageBW = mh.morph.close(imageBW)
+	#imageBW = mh.morph.close(imageBW)
 	
 	
 	
