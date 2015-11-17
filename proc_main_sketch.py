@@ -16,15 +16,21 @@ def unique(a):
 
 def main():
 	
-
-
+	#Define flags for face detection and background detection
+	face_flag = 0
+	bg_flag = 1
+	
+	#Set wait limit (in number of frames) to end action
+	wait_limit = 45
+	
+	#About a delay with a threshold of 50 (intensity)
+	fgbg = cv2.createBackgroundSubtractorMOG2(50000,100)
+	
+	#Parse all of the arguments
 	ap = argparse.ArgumentParser()
 	ap.add_argument("-v", "--video",
 		help = "path to the (optional) video file")
 	args = vars(ap.parse_args())
-
-	#About a 10 second delay with a threshold of 50 (intensity)
-	fgbg = cv2.createBackgroundSubtractorMOG2(5000,50)
 	
 	# if no video, use webcam
 	if not args.get("video", False):
@@ -32,86 +38,84 @@ def main():
 	else:
 		nome = args["video"]
 	
+	# Capture first frame
+	
 	cap = cv2.VideoCapture(nome)
-
 	ret, frame = cap.read()
 
-	objectx_old = []
-	objecty_old = []
-	ct = 0
-	
-	#Unsuccessful attempt at interaction...
-	#if nome is 0:
-	#	ret, frame = cap.read()
-	#	cv2.imshow("First Frame",frame)
-	#	print "First frame to be sent to findMinMaxSkin()\n"
-	#	print "Press any key to continue... \n"
-	#	cv2.waitKey(0)
-	#	
-	#	retryInitial = raw_input("Would you like a new initial frame? Y/N \n")
-	#	if retryInitial is "Y":
-	#		print "Please adjust appropriately"
-	#		ret,frame = cap.read()
-	#		cv2.imshow("New initial frame", frame)
-
-		#binary_frame = skin2BW(frame)
-	#	minSkin,maxSkin = findMinMaxSkin(frame)
-	#else:
-	ret, frame = cap.read()
-		#binary_frame = skin2BW(frame)
-	minSkin,maxSkin = findMinMaxHand(frame)#findMinMaxSkin(frame)
-	
-	print minSkin
-	print maxSkin
-	
 	# Create some random colors
 	color = np.random.randint(0,255,(100,3))
 	
+	#Find face if flagged
+	if face_flag == 1:
+		minSkin,maxSkin = findMinMaxHand(frame)#findMinMaxSkin(frame)
+		print minSkin
+		print maxSkin
+	
+	#Initialize arrays, counters, masks, etc
+	
+	objectx_old = []
+	objecty_old = []
+	ct = 0
 	sz = np.shape(frame)
 	mask = np.zeros(shape=(sz[0],sz[1],3,20), dtype = np.uint8)
-	#print np.shape(mask)
-	#mask = np.zeros_like(frame)
 	mask_old = np.copy(mask)
+	tim = np.zeros(20)
+	
+	#Loop through each frame
 	
 	while(cap.isOpened()):
 		
-		fgmask = fgbg.apply(frame)
-		masked_frame = cv2.bitwise_and(frame,frame,mask = fgmask)
-		#binary_frame = skin2BW(masked_frame)#personalSkin2BW(frame,minSkin,maxSkin)#skin2BW(frame)
-		binary_frame = skin2BW(frame)
+		#If background subtraction is on, do that
+		if bg_flag == 1:
+			fgmask = fgbg.apply(frame)
+			masked_frame = cv2.bitwise_and(frame,frame,mask = fgmask)
+		else:
+			masked_frame = frame
+
+		#If face detection is on, use personalized skin hue for binary conversion
+		if face_flag == 1:
+			binary_frame = personalSkin2BW(masked_frame,minSkin,maxSkin)
+		else:
+			binary_frame = skin2BW(masked_frame)
 		
-		
+		#Find blobs in binary image
 		frame, contours = blob(binary_frame,frame)
+		
+		#Show binary image
 		cv2.imshow('frame',binary_frame)
 		
-		
+		#Check if a frame was found
 		if not ret == False:
-		
+			
+			#Initialize variable which change with each frame
 			objectx = []
 			objecty = []
-		
+			objectloc = []
+			objectval = []
+			x = []
+			y = []
+			img = np.copy(frame)
+			
+			#Find contours around blobs
 			for i, c in enumerate(contours):
 				area = cv2.contourArea(c)
 
-				if area > 500:
+				if area > 250:
 			
 					cent = cv2.moments(c)
 					temp = cent['m00']
 					if not temp == 0:
 						cx = int(cent['m10']/cent['m00'])
 						cy = int(cent['m01']/cent['m00'])
-						#cv2.circle(frame,(cx,cy),5,(0,0,255),-2)
 						objectx.append(cx)
 						objecty.append(cy)
 			
-			objectloc = []
-			objectval = []
-			x = []
-			y = []
-			
-			img = np.copy(frame)
+			#Check if any objects were found
 			if not objectx_old == []:
 				
+				#Loop through each object in current frame and compute distance
+				#to each object in previous frame
 				for i, j in zip(objectx, objecty):
 	
 					x_dist = np.array(objectx_old)
@@ -123,19 +127,19 @@ def main():
 					x_dist = np.square(x_dist)
 					
 					dist = np.sqrt(x_dist+y_dist)
-					minloc = np.argmin(dist)
-					minval = dist[minloc]
-					objectloc.append(minloc)
-					objectval.append(minval)
-					x.append(i)
-					y.append(j)
 					
-					#if ct > 337:
-						#print x_dist, y_dist, dist
-						#print objectloc, objectval
+					if len(dist) > 0:
+						minloc = np.argmin(dist)
+						minval = dist[minloc]
+						objectloc.append(minloc)
+						objectval.append(minval)
+						x.append(i)
+						y.append(j)
+						
+			#Check if any objects were found to match previous frame objects
 			if not objectloc == []:
-				#if ct > 337:
-					#print objectloc, objectval
+				
+				#Initialize parameters for loop over individual objects
 				mx = np.amax(objectloc)
 				mn = np.amin(objectloc)
 				
@@ -144,74 +148,58 @@ def main():
 				locs = np.zeros_like(objs)-1
 				co = len(objectloc)
 				co2 = len(objs)
-				#if ct > 338:
-					#print locs, vals
-					
-				#print "objectloc =", objectloc, "objectval =", objectval
-				
+
+				#Ensure at most only 1 current object mapped to previous object
 				for i in range(0, co2):
 					for j in range(0, co):
-						#print "objs = ", objs[i], "objectloc = ", objs[j], "objectval = ", objectval[j], "vals = ", vals
 						if objs[i] == objectloc[j]:
 							if objectval[j] < vals[i]:
 								vals[i] = objectval[j]
-								locs[i] = j#objectloc[j]
-								#if ct > 337:
-									#print locs, vals								
-							#print "vals =", vals
+								locs[i] = j
+
 				objectval2 = np.zeros_like(objectval)-1
-				#print "locs =", locs, "objectval2 =", objectval2, "co2 = ", co2
-				
-				#os.system("pause")
 				
 				for i in range(0, co2):
 					if locs[i] > -1:
 						if locs[i] < co2:
 							objectval2[locs[i]] = objectval[locs[i]]
 				
-				#if ct > 1:
-					#print ct, objectloc, objectx_old, objecty_old
-				
+				#Initialize mask parameters
 				img = cv2.add(frame,mask[:,:,:,0])
 				mask_check = np.zeros(20)
 				frame2 = np.copy(frame)
-				for i in range(0, co-1):
+				
+				#Loop through each matched object and add to corresponding mask
+				for i in range(0, co):
 					if objectval2[i] > -1:
 						hihi = 1
-						#cv2.circle(frame,(x[i],y[i]),5,(0,0,255),-2)
 											
-						a = objectx_old[objectloc[i]]
-						b = objecty_old[objectloc[i]]
-						c = objectx[i]
-						d = objecty[i]
+						a = np.copy(objectx_old[objectloc[i]])
+						b = np.copy(objecty_old[objectloc[i]])
+						c = np.copy(objectx[i])
+						d = np.copy(objecty[i])
 						
-						#if ct > 337:
-							#print i, a, b, c, d, locs
-							
-						#mask[:,:,3*i:3*i+2] = cv2.line(mask_old[:,:,3*objectloc[i]:3*objectloc[i]+2], (a,b),(c,d), color[i].tolist(), 2)
-						#print i, np.shape(mask[:,:,:,i]), np.shape(mask_old[:,:,:,objectloc[i]])
+						dist = abs(((a-c)^2+(b-d)^2)^(1/2))
+						mask_check[i] = 1
+						
+						if dist < 5:
+							tim[i] = tim[i]+1
+							if tim[i] > wait_limit:
+								mask[:,:,:,i] = 0
+								tim[i] = 0
+								mask_check[i] = 0
+
 						temp1 = np.copy(mask_old[:,:,:,objectloc[i]])
-						#temp = cv2.line(mask_old[:,:,:,objectloc[i]], (a,b),(c,d), color[i].tolist(), 2)
 						if np.sum(mask[:,:,:,i]) > 0:
 							mask[:,:,:,i] = cv2.line(temp1, (a,b),(c,d), color[i].tolist(), 2)
 						else:
 							mask[:,:,:,i] = cv2.circle(temp1,(a,b),5,color[i].tolist(),-1)
-						#print np.shape(temp)
-						#mask = cv2.line(mask_old, (a,b),(c,d), color[i].tolist(), 2)
+
 						frame2 = cv2.circle(frame2,(a,b),5,color[i].tolist(),-1)
-						mask_check[i] = 1
-					#if mask_old.all() == mask.all():
-						#mask = np.zeros_like(frame)
-						#mask_old = np.copy(mask)
-					#print np.shape(mask[:,:,:,i]), np.shape(img), np.shape(frame2)	
-					#print np.shape(mask), np.shape(img)
-					#img[:,:,:] = cv2.add(np.array(frame2[:,:,:], dtype=np.uint8),np.array(mask[:,:,:,i], dtype=np.uint8))
-					#mask2 = np.copy(mask[:,:,:,i])
-					#mask3 = np.copy(mask2[:,:,:])
-					#print np.shape(mask3), np.shape(img), np.shape(frame2)
-					#img = cv2.add(frame2,mask3)
-					
-					#cv2.imshow('frame',img)
+						objectx_old[objectloc[i]] = np.copy(objectx[i])
+						objecty_old[objectloc[i]] = np.copy(objecty[i])
+				
+				#Check if a mask disappeared
 				for i in range(0, 19):
 					if mask_check[i] == 0:
 						mask[:,:,:,i] = 0
@@ -220,28 +208,23 @@ def main():
 				
 				mask_old = np.copy(mask)
 				img = np.copy(frame2)
-			objectx_old = objectx
-			objecty_old = objecty
-			
+			else:
+				for i in range(0, 19):
+					mask[:,:,:,i] = 0
+				mask_old = np.copy(mask)
+
+			objectx_old = np.copy(objectx)
+			objecty_old = np.copy(objecty)
 
 		else:
 			break
 		
-		#print objectloc, objectval
-		#cv2.imshow('frame',img)#frame)
-		
+		#Increment frame counter
 		ct = ct+1
+		#Show frame with magic applied
 		cv2.imshow('frame',img)
 		
-		#if ct > 337:
-		#print ct
-		#os.system("pause")
-		#	plt.imshow(img,interpolation='none')
-		#	plt.show()
-		#	os.system("pause")
-		#else:
-		#	cv2.imshow('frame',img)#frame)
-			
+		#Check for break code
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
 		
