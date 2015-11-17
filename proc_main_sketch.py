@@ -20,8 +20,9 @@ def main():
 	face_flag = 0
 	bg_flag = 1
 	
-	#Set wait limit (in number of frames) to end action
-	wait_limit = 45
+	#Set arbitrary limits
+	wait_limit = 45 # number of frames before ending action
+	area_limit = 500 # pixels squared
 	
 	#About a delay with a threshold of 50 (intensity)
 	fgbg = cv2.createBackgroundSubtractorMOG2(50000,100)
@@ -80,7 +81,7 @@ def main():
 			binary_frame = skin2BW(masked_frame)
 		
 		#Find blobs in binary image
-		frame, contours = blob(binary_frame,frame)
+		frame, contours = blob(binary_frame,frame,area_limit)
 		
 		#Show binary image
 		cv2.imshow('frame',binary_frame)
@@ -101,7 +102,7 @@ def main():
 			for i, c in enumerate(contours):
 				area = cv2.contourArea(c)
 
-				if area > 250:
+				if area > area_limit:
 			
 					cent = cv2.moments(c)
 					temp = cent['m00']
