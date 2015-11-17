@@ -6,6 +6,7 @@ import mahotas as mh
 from skin2BW import skin2BW, personalSkin2BW
 from findMinMaxSkin import findMinMaxSkin, findMinMaxHand
 from blob import blob
+import matplotlib.pyplot as plt
 
 def unique(a):
     a = np.sort(a)
@@ -23,7 +24,7 @@ def main():
 	args = vars(ap.parse_args())
 
 	#About a 10 second delay with a threshold of 50 (intensity)
-	fgbg = cv2.createBackgroundSubtractorMOG2(50000,50)
+	fgbg = cv2.createBackgroundSubtractorMOG2(5000,50)
 	
 	# if no video, use webcam
 	if not args.get("video", False):
@@ -37,12 +38,31 @@ def main():
 
 	objectx_old = []
 	objecty_old = []
+	ct = 0
+	
+	#Unsuccessful attempt at interaction...
+	#if nome is 0:
+	#	ret, frame = cap.read()
+	#	cv2.imshow("First Frame",frame)
+	#	print "First frame to be sent to findMinMaxSkin()\n"
+	#	print "Press any key to continue... \n"
+	#	cv2.waitKey(0)
+	#	
+	#	retryInitial = raw_input("Would you like a new initial frame? Y/N \n")
+	#	if retryInitial is "Y":
+	#		print "Please adjust appropriately"
+	#		ret,frame = cap.read()
+	#		cv2.imshow("New initial frame", frame)
+
+		#binary_frame = skin2BW(frame)
+	#	minSkin,maxSkin = findMinMaxSkin(frame)
+	#else:
 	ret, frame = cap.read()
-	#binary_frame = skin2BW(frame)
+		#binary_frame = skin2BW(frame)
 	minSkin,maxSkin = findMinMaxHand(frame)#findMinMaxSkin(frame)
 	
-	#print minSkin
-	#print maxSkin
+	print minSkin
+	print maxSkin
 	
 	# Create some random colors
 	color = np.random.randint(0,255,(100,3))
@@ -57,8 +77,8 @@ def main():
 		
 		fgmask = fgbg.apply(frame)
 		masked_frame = cv2.bitwise_and(frame,frame,mask = fgmask)
-		binary_frame = personalSkin2BW(masked_frame,minSkin,maxSkin)#skin2BW(frame)
-		#binary_frame = skin2BW(frame)
+		#binary_frame = skin2BW(masked_frame)#personalSkin2BW(frame,minSkin,maxSkin)#skin2BW(frame)
+		binary_frame = skin2BW(frame)
 		
 		
 		frame, contours = blob(binary_frame,frame)
@@ -109,8 +129,13 @@ def main():
 					objectval.append(minval)
 					x.append(i)
 					y.append(j)
-					#print dist
+					
+					#if ct > 337:
+						#print x_dist, y_dist, dist
+						#print objectloc, objectval
 			if not objectloc == []:
+				#if ct > 337:
+					#print objectloc, objectval
 				mx = np.amax(objectloc)
 				mn = np.amin(objectloc)
 				
@@ -119,7 +144,9 @@ def main():
 				locs = np.zeros_like(objs)-1
 				co = len(objectloc)
 				co2 = len(objs)
-				
+				#if ct > 338:
+					#print locs, vals
+					
 				#print "objectloc =", objectloc, "objectval =", objectval
 				
 				for i in range(0, co2):
@@ -128,7 +155,9 @@ def main():
 						if objs[i] == objectloc[j]:
 							if objectval[j] < vals[i]:
 								vals[i] = objectval[j]
-								locs[i] = objectloc[j]				
+								locs[i] = j#objectloc[j]
+								#if ct > 337:
+									#print locs, vals								
 							#print "vals =", vals
 				objectval2 = np.zeros_like(objectval)-1
 				#print "locs =", locs, "objectval2 =", objectval2, "co2 = ", co2
@@ -140,6 +169,9 @@ def main():
 						if locs[i] < co2:
 							objectval2[locs[i]] = objectval[locs[i]]
 				
+				#if ct > 1:
+					#print ct, objectloc, objectx_old, objecty_old
+				
 				img = cv2.add(frame,mask[:,:,:,0])
 				mask_check = np.zeros(20)
 				frame2 = np.copy(frame)
@@ -147,15 +179,23 @@ def main():
 					if objectval2[i] > -1:
 						hihi = 1
 						#cv2.circle(frame,(x[i],y[i]),5,(0,0,255),-2)
-						c = objectx[i]
-						d = objecty[i]
+											
 						a = objectx_old[objectloc[i]]
 						b = objecty_old[objectloc[i]]
+						c = objectx[i]
+						d = objecty[i]
+						
+						#if ct > 337:
+							#print i, a, b, c, d, locs
+							
 						#mask[:,:,3*i:3*i+2] = cv2.line(mask_old[:,:,3*objectloc[i]:3*objectloc[i]+2], (a,b),(c,d), color[i].tolist(), 2)
 						#print i, np.shape(mask[:,:,:,i]), np.shape(mask_old[:,:,:,objectloc[i]])
 						temp1 = np.copy(mask_old[:,:,:,objectloc[i]])
 						#temp = cv2.line(mask_old[:,:,:,objectloc[i]], (a,b),(c,d), color[i].tolist(), 2)
-						mask[:,:,:,i] = cv2.line(temp1, (a,b),(c,d), color[i].tolist(), 2)
+						if np.sum(mask[:,:,:,i]) > 0:
+							mask[:,:,:,i] = cv2.line(temp1, (a,b),(c,d), color[i].tolist(), 2)
+						else:
+							mask[:,:,:,i] = cv2.circle(temp1,(a,b),5,color[i].tolist(),-1)
 						#print np.shape(temp)
 						#mask = cv2.line(mask_old, (a,b),(c,d), color[i].tolist(), 2)
 						frame2 = cv2.circle(frame2,(a,b),5,color[i].tolist(),-1)
@@ -170,13 +210,13 @@ def main():
 					#mask3 = np.copy(mask2[:,:,:])
 					#print np.shape(mask3), np.shape(img), np.shape(frame2)
 					#img = cv2.add(frame2,mask3)
-					frame2 = cv2.add(frame2,mask[:,:,:,i])
-					
 					
 					#cv2.imshow('frame',img)
 				for i in range(0, 19):
 					if mask_check[i] == 0:
 						mask[:,:,:,i] = 0
+					else:
+						frame2 = cv2.add(frame2,mask[:,:,:,i])
 				
 				mask_old = np.copy(mask)
 				img = np.copy(frame2)
@@ -188,8 +228,20 @@ def main():
 			break
 		
 		#print objectloc, objectval
-		cv2.imshow('frame',img)#frame)
+		#cv2.imshow('frame',img)#frame)
+		
+		ct = ct+1
+		cv2.imshow('frame',img)
+		
+		#if ct > 337:
+		#print ct
 		#os.system("pause")
+		#	plt.imshow(img,interpolation='none')
+		#	plt.show()
+		#	os.system("pause")
+		#else:
+		#	cv2.imshow('frame',img)#frame)
+			
 		if cv2.waitKey(1) & 0xFF == ord('q'):
 			break
 		
