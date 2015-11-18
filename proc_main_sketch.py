@@ -189,13 +189,16 @@ def main():
 								mask[:,:,:,i] = 0
 								tim[i] = 0
 								mask_check[i] = 0
-
+						else:
+							tim[i] = 0
 						temp1 = np.copy(mask_old[:,:,:,objectloc[i]])
 						if np.sum(mask[:,:,:,i]) > 0:
+						#Connect the dots
 							mask[:,:,:,i] = cv2.line(temp1, (a,b),(c,d), color[i].tolist(), 2)
 						else:
+						#Start point
 							mask[:,:,:,i] = cv2.circle(temp1,(a,b),5,color[i].tolist(),-1)
-
+						#Current point/End pointt
 						frame2 = cv2.circle(frame2,(a,b),5,color[i].tolist(),-1)
 						objectx_old[objectloc[i]] = np.copy(objectx[i])
 						objecty_old[objectloc[i]] = np.copy(objecty[i])
@@ -203,6 +206,7 @@ def main():
 				#Check if a mask disappeared
 				for i in range(0, 19):
 					if mask_check[i] == 0:
+					#to add: if summing to nonzero, send as an output mask
 						mask[:,:,:,i] = 0
 					else:
 						frame2 = cv2.add(frame2,mask[:,:,:,i])

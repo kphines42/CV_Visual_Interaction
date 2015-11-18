@@ -25,7 +25,7 @@ def skin2BW(frame):
 	imageCb = cv2.split(imageYCrCb)[2]
 
 	#Filter based on luminescence and chromatic channels
-	imageY_S = imageY > 80
+	imageY_S = imageY > 60
 
 	imageCr_S1 = imageCr > 135	
 	imageCr_S2 = imageCr < 180
@@ -39,19 +39,17 @@ def skin2BW(frame):
 	imageBWTemp = imageY_S & imageCr_S
 	imageBW = imageBWTemp & imageCb_S
 	
-	imageBW = mh.morph.dilate(imageBW)
-	imageBW = mh.morph.dilate(imageBW)
-	imageBW = mh.morph.dilate(imageBW)
-	imageBW = mh.morph.dilate(imageBW)
-	imageBW = mh.morph.dilate(imageBW)
-
 	imageBW = mh.morph.erode(imageBW)
 	imageBW = mh.morph.erode(imageBW)
 	imageBW = mh.morph.erode(imageBW)
 	imageBW = mh.morph.erode(imageBW)
 	imageBW = mh.morph.erode(imageBW)
 
-	imageBW = mh.morph.close(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
+	imageBW = mh.morph.dilate(imageBW)
 	
 	#Convert imageBW to uint8
 	imageBW = imageBW.astype(int)*255
@@ -108,7 +106,7 @@ def personalSkin2BW(frame,minSkin,maxSkin):
 
 
 
-	#imageBW = mh.morph.close(imageBW)
+	imageBW = mh.morph.close(imageBW)
 	
 	
 	
