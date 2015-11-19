@@ -43,6 +43,11 @@ def main():
 	
 	cap = cv2.VideoCapture(nome)
 	ret, frame = cap.read()
+	if cap.isOpened():
+		print "Success"
+	else:
+		print "Unable to open file/webcam"
+		return
 
 	# Create some random colors
 	color = np.random.randint(0,255,(100,3))
