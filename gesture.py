@@ -7,30 +7,11 @@ import numpy as np
 import math
 #from skin2BW import skin2BW
 
-def start = startGest(imageBW, imageContours):
-	#Start by finding the contours
-	max_area = -1
-    for i in range(len(imageContours)):
-        cnt=imageContours[i]
-        area = cv2.contourArea(cnt)
-        if(area>max_area):
-            max_area=area
-            ci=i
-    cnt=imageContours[ci]
-	
-	#Draw a bounding rectangle around the image contour area
-    x,y,w,h = cv2.boundingRect(cnt)
-    cv2.rectangle(imageBW,(x,y),(x+w,y+h),(0,0,255),0)
-	
-	#Find the hull
-    #hull = cv2.convexHull(cnt)
-    #drawing = np.zeros(imageBW.shape,np.uint8)
-    #cv2.drawContours(drawing,[cnt],0,(0,255,0),0)
-    #cv2.drawContours(drawing,[hull],0,(0,0,255),0)
-    hull = cv2.convexHull(cnt,returnPoints = False)
-    defects = cv2.convexityDefects(cnt,hull)
-    count_defects = 0
-    cv2.drawContours(imageBW, imageContours, -1, (0,255,0), 3)
+def startGest(imageBW, imageContours, imageDefects):
+	cnt=imageContours[:]
+	defects = imageDefects.copy()
+	count_defects = 0
+	#cv2.drawContours(imageBW, imageContours, -1, (0,255,0), 3)
 	
 	#Determine the spaces in between the fingers.
     for i in range(defects.shape[0]):
@@ -56,30 +37,11 @@ def start = startGest(imageBW, imageContours):
 		start = 0
 	return start
 	
-def stop = stopGest(imageBW, imageContour):
-	#Start by finding the contours
-	max_area = -1
-    for i in range(len(imageContours)):
-        cnt=imageContours[i]
-        area = cv2.contourArea(cnt)
-        if(area>max_area):
-            max_area=area
-            ci=i
-    cnt=imageContours[ci]
-	
-	#Draw a bounding rectangle around the image contour area
-    x,y,w,h = cv2.boundingRect(cnt)
-    cv2.rectangle(imageBW,(x,y),(x+w,y+h),(0,0,255),0)
-	
-	#Find the hull
-    #hull = cv2.convexHull(cnt)
-    #drawing = np.zeros(imageBW.shape,np.uint8)
-    #cv2.drawContours(drawing,[cnt],0,(0,255,0),0)
-    #cv2.drawContours(drawing,[hull],0,(0,0,255),0)
-    hull = cv2.convexHull(cnt,returnPoints = False)
-    defects = cv2.convexityDefects(cnt,hull)
-    count_defects = 0
-    cv2.drawContours(imageBW, imageContours, -1, (0,255,0), 3)
+def stopGest(imageBW, imageContour, imageDefects):
+	cnt=imageContours[:]
+	defects = imageDefects.copy()
+	count_defects = 0
+	#cv2.drawContours(imageBW, imageContours, -1, (0,255,0), 3)
 	
 	#Determine the spaces in between the fingers.
     for i in range(defects.shape[0]):
@@ -95,9 +57,8 @@ def stop = stopGest(imageBW, imageContour):
 			if angle >= 20:
 				count_defects += 1
 				cv2.circle(crop_img,far,1,[0,0,255],-1)
-        #dist = cv2.pointPolygonTest(cnt,far,True)
-        #cv2.line(imageBW,start,end,[0,255,0],2)
-        #cv2.circle(crop_img,far,5,[0,0,255],-1)
+    
+	#See if the counted defects are less than two...
     if count_defects <= 2:
         cv2.putText(img,"Stop", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)
 		stop = 1
