@@ -8,6 +8,7 @@ from findMinMaxSkin import findMinMaxSkin, findMinMaxHand
 from blob import blob2
 from gesture import startGest, stopGest
 import matplotlib.pyplot as plt
+from trackObj import trackObj, trackObj2
 
 def unique(a):
     a = np.sort(a)
@@ -85,7 +86,7 @@ def main():
 		if bg_flag == 1:
 			#if bg_cnt <= bgLim:
 			fgmask = fgbg.apply(frame)
-			bg_cnt = bg_cnt+1;
+			#bg_cnt = bg_cnt+1;
 				#print "Apply BG Sub"
 			masked_frame = cv2.bitwise_and(frame,frame,mask = fgmask)
 			
@@ -99,7 +100,7 @@ def main():
 		#	binary_frame = skin2BW(masked_frame)
 		
 		frame = cv2.line(frame,(40,200),(600,200),(0,255,0),2)
-		crop_img = frame[200:600, 100:600]
+		crop_img = frame[200:600, 40:600]
 		binary_frame = skin2BW(crop_img)
 		
 		cv2.imshow('BW Frame',binary_frame)
@@ -131,6 +132,8 @@ def main():
 					stop_flag = 0
 				else:
 					stop_cnt = 0
+					
+				(frame,objectx_old,objecty_old,mask,mask_old) = trackObj2(frame,contours,objectx_old,objecty_old,mask,mask_old,area_limit)
 				
 			if stop_flag == 1 and ct2 < 10:
 				cv2.putText(frame,"Stop", (50,50), cv2.FONT_HERSHEY_SIMPLEX, 2, 2)			
@@ -144,6 +147,18 @@ def main():
 				stop_flag  = 0
 				ct1 = 0
 				ct2 = 0
+				
+				#Clear out all flags after being stopped for X amount of time
+				start_flag = 0
+				stop_flag  = 0
+				ct1 = 0
+				ct2 = 0
+				
+				print "Output mask created. \n"
+				mask_output = mask_old
+				objectx_old = []
+				objecty_old = []
+						
 		else:
 			print "Defects do not exist\n"
 		#Show frame with magic applied
