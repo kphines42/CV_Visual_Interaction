@@ -100,12 +100,14 @@ def main():
 		#	binary_frame = skin2BW(masked_frame)
 		
 		frame = cv2.line(frame,(40,200),(600,200),(0,255,0),2)
-		crop_img = frame[200:600, 40:600]
-		binary_frame = skin2BW(crop_img)
+		#crop_img = frame[200:600, 40:600]
+		
+		binary_frame = skin2BW(frame)
+		binary_frame[0:199][:] = 0
 		
 		cv2.imshow('BW Frame',binary_frame)
 		#Find blobs in binary image
-		__ , contours, contoursOut, defects = blob2(binary_frame,crop_img,area_limit)
+		__ , contours, contoursOut, defects = blob2(binary_frame,frame,area_limit)
 		
 		if not defects == []:
 			#print "Defects Exist\n"
@@ -156,6 +158,7 @@ def main():
 				
 				print "Output mask created. \n"
 				mask_output = mask_old
+				#print mask_output
 				objectx_old = []
 				objecty_old = []
 						

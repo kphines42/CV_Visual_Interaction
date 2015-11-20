@@ -1,0 +1,44 @@
+Random phrases
+1
+The rock is solid and strong, and points you in the wrong direction.
+2
+You appear upon a boggy land and fear the water.
+3
+Looking upon the skies, you feel as if you are in a fish bowl.
+4
+The sunset becons you to different lands.
+5
+You have appeared in a place where vacuum tubes magical. You decide to leave.
+6
+You decide to follow your own path and become rather cold.
+7
+The cat's curiosity leads either to failure or reward.
+8
+The city lights appear cold off in the distance. This is not the place you seek.
+9
+You actually are in a fish bowl now.
+10
+This scene looks just like an example in class...
+11
+You are now in a fish bown with fish and anenomes.
+12
+This is the city you were looking for. However, you must go somewhere else, first.
+13
+The parakeet insists on maiden sacrifice. Otherwise, he will burn the village to the ground.
+14
+You have happened upon a land where people can code using their thoughts. You don't have good enough programming skills to stay.
+15
+The icy environment encourages you to move on to the next place.
+16
+The mountains invite you to explore them.
+17
+You find a lonely tree on top of a hill. You pass it on your journey.
+18
+You happened upon darkness.
+19
+You feel dreadfully cold. You probably should have brought a light jacket.
+20
+You are in space, and you don't know how you got there.
+
+
+

@@ -288,11 +288,11 @@ def trackObj2(frame,contours,objectx_old,objecty_old,mask,mask_old,area_limit):
 					
 		#Check if a mask disappeared
 		for i in range(0, 19):
-			if mask_check[i] == 0:
+			#if mask_check[i] == 0:
 			#to add: if summing to nonzero, send as an output mask
-				mask[:,:,:,i] = 0
-			else:
-				frame2 = cv2.add(frame2,mask[:,:,:,i])
+			#	mask[:,:,:,i] = 0
+			#else:
+			frame2 = cv2.add(frame2,mask[:,:,:,i])
 		
 		mask_old = np.copy(mask)
 		img = np.copy(frame2)
