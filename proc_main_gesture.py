@@ -5,7 +5,7 @@ import os
 import mahotas as mh
 from skin2BW import skin2BW, personalSkin2BW
 from findMinMaxSkin import findMinMaxSkin, findMinMaxHand
-from blob import blob
+from blob import blob2
 import matplotlib.pyplot as plt
 
 def unique(a):
@@ -17,8 +17,10 @@ def unique(a):
 def main():
 	
 	#Define flags for face detection and background detection
-	face_flag = 0
-	bg_flag = 1
+	face_flag  = 0
+	bg_flag    = 1
+	start_flag = 0
+	stop_flag  = 0
 	
 	#Set arbitrary limits
 	wait_limit = 45 # number of frames before ending action
@@ -44,7 +46,7 @@ def main():
 	cap = cv2.VideoCapture(nome)
 	ret, frame = cap.read()
 	if cap.isOpened():
-		print "Success"
+		print "Success\n"
 	else:
 		print "Unable to open file/webcam"
 		return
@@ -55,21 +57,28 @@ def main():
 	#Find face if flagged
 	if face_flag == 1:
 		minSkin,maxSkin = findMinMaxHand(frame)#findMinMaxSkin(frame)
-		print minSkin
-		print maxSkin
-	
+		#print minSkin
+		#print maxSkin
+
+
 	#Initialize arrays, counters, masks, etc
-	
 	objectx_old = []
 	objecty_old = []
+	
+	#Starting all of the counters
 	ct = 0
+	ct1 = 0
+	ct2 = 0
+	start_cnt = 0
+	stop_cnt  = 0
+	
+	#Creating mask arrays
 	sz = np.shape(frame)
 	mask = np.zeros(shape=(sz[0],sz[1],3,20), dtype = np.uint8)
 	mask_old = np.copy(mask)
 	tim = np.zeros(20)
 	
 	#Loop through each frame
-	
 	while(cap.isOpened()):
 		
 		#If background subtraction is on, do that
@@ -82,11 +91,13 @@ def main():
 		#If face detection is on, use personalized skin hue for binary conversion
 		if face_flag == 1:
 			binary_frame = personalSkin2BW(masked_frame,minSkin,maxSkin)
+		elif gest_flag == 1:
+			
 		else:
 			binary_frame = skin2BW(masked_frame)
 		
 		#Find blobs in binary image
-		frame, contours = blob(binary_frame,frame,area_limit)
+		frame, contours, defects = blob2(binary_frame,frame,area_limit)
 		
 		#Show binary image
 		cv2.imshow('frame',binary_frame)
@@ -120,8 +131,8 @@ def main():
 			#Check if any objects were found
 			if not objectx_old == []:
 				
-				#Loop through each object in current frame and compute distance
-				#to each object in previous frame
+				#Loop through each object in current frame and compute
+				#distance to each object in previous frame
 				for i, j in zip(objectx, objecty):
 	
 					x_dist = np.array(objectx_old)
@@ -165,6 +176,7 @@ def main():
 
 				objectval2 = np.zeros_like(objectval)-1
 				
+				#Still matching current objects to previous ones.
 				for i in range(0, co2):
 					if locs[i] > -1:
 						if locs[i] < co2:
@@ -218,6 +230,9 @@ def main():
 				
 				mask_old = np.copy(mask)
 				img = np.copy(frame2)
+				
+			#I think this else is for the case where there weren't
+			#any previous objects.
 			else:
 				for i in range(0, 19):
 					mask[:,:,:,i] = 0
@@ -226,6 +241,7 @@ def main():
 			objectx_old = np.copy(objectx)
 			objecty_old = np.copy(objecty)
 
+		#If the frame was not found o' so long ago...
 		else:
 			break
 		

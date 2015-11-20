@@ -41,9 +41,9 @@ def skin2BW(frame):
 	
 	imageBW = mh.morph.erode(imageBW)
 	imageBW = mh.morph.erode(imageBW)
-	imageBW = mh.morph.erode(imageBW)
-	imageBW = mh.morph.erode(imageBW)
-	imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
+	#imageBW = mh.morph.erode(imageBW)
 
 	imageBW = mh.morph.dilate(imageBW)
 	imageBW = mh.morph.dilate(imageBW)
