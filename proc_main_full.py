@@ -8,8 +8,8 @@ from findMinMaxSkin import findMinMaxSkin, findMinMaxHand
 from blob import blob, blob2
 from gesture import startGest, stopGest
 import matplotlib.pyplot as plt
-from build_filters import build_filters
-from filt_hist import filt_hist
+#from build_filters import build_filters
+#from filt_hist import filt_hist
 from coHi3 import coHi3
 from fcent import fcent
 from objdist import objdist
@@ -69,7 +69,7 @@ def main():
 	
 	#Build filters
 	n = 4
-	filters = build_filters(n)
+	#filters = build_filters(n)
 	
 	#Loop through gestures to store histograms
 	ct = 0
